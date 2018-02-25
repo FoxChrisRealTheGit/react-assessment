@@ -85,7 +85,6 @@ class Home extends Component {
         })
     }
     removeTask(id) {
-        console.log(id)
         this.props.deletTask(id);
         // const taskStyle = {
         //     display: 'flex',
@@ -105,8 +104,8 @@ class Home extends Component {
         //     return this.setState({ tasks: mappedtasks })
         // })
     }
-    completeTask() {
-        this.props.putTask();
+    completeTask(id) {
+        this.props.putTask(id);
         // const taskStyle = {
         //     display: 'flex',
         // }

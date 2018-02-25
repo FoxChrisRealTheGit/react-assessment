@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { getSingleTask, getTasks, postTask, patchTask, deletTask, putTask, getState } from '../ducks/reducer';
+import { getSingleTask, getTasks, postTask, patchTask,patchTaskTitle, deletTask, putTask, getState } from '../ducks/reducer';
 
 
 class EditView extends Component {
@@ -20,23 +20,24 @@ class EditView extends Component {
         var mappedtasks;
         var id = this.props.match.params.id
         let prom = this.props.getSingleTask(id)
-        console.log(id);
         var tasks = new Promise(function (resolve, reject) {
             setTimeout(resolve, 100, prom)
         }).then(res => {
             mappedtasks = res.value.map((x, i, arr) => {
+
                 if (x.id == id) {
                     return (
                         <div key={i} style={taskStyle}>
                             <h3>{x.title}</h3>
                             <button onClick={() => this.completeTask(x.id)}>complete</button>
-                            <h4>{x.description}</h4><button onClick={() => this.handleDescriptionChange}>changeDescription</button>
+                            <div><h4>{x.description}</h4></div>
+                            <button onClick={() => this.handleDescriptionChange}>changeDescription</button>
                             <button onClick={() => this.removeTask(x.id)}>X</button>
                         </div>
                     )
                 }
             })
-            return this.setState({ tasks: mappedtasks })
+            return this.setState({ tasks: mappedtasks, title: '', description: '' })
         })
 
     }
@@ -47,7 +48,6 @@ class EditView extends Component {
         var mappedtasks;
         var id = this.props.match.params.id
         let prom = this.props.getSingleTask(id)
-        console.log(id);
         var tasks = new Promise(function (resolve, reject) {
             setTimeout(resolve, 100, prom)
         }).then(res => {
@@ -56,8 +56,9 @@ class EditView extends Component {
                     return (
                         <div key={i} style={taskStyle}>
                             <h3>{x.title}</h3>
+                            <button onClick={() => this.updateTaskTwo(x.id)}>change Title</button>
                             <button onClick={() => this.completeTask(x.id)}>complete</button>
-                            <h4>{x.description}</h4><button onClick={() => this.handleDescriptionChange()}>changeDescription</button>
+                            <h4>{x.description}</h4><button onClick={() => this.updateTask(id)}>changeDescription</button>
                             <button onClick={() => this.removeTask(x.id)}>X</button>
                         </div>
                     )
@@ -78,16 +79,24 @@ class EditView extends Component {
     removeTask(id) {
         this.props.deletTask(id);
     }
-    completeTask() {
-        this.props.putTask();
+    completeTask(id) {
+        this.props.putTask(id);
     }
-
+    updateTask(id){
+        
+        this.props.patchTask(id, this.state.description);
+    }
+    updateTaskTwo(id){
+        
+        this.props.patchTaskTitle(id, this.state.title);
+    }
     render() {
         return (
             <div>
                 <a href='/'>Return to tasks</a>
                 <div>
                     {this.state.tasks}
+                    <input onChange={e=> this.handleTitleChange(e.target.value)}></input>
                     <input onChange={e => { this.handleDescriptionChange(e.target.value) }}></input>
                     <a href='/'><button>Save</button></a>
                     <a href='/'><button>Cancel</button></a>
@@ -100,4 +109,4 @@ class EditView extends Component {
 function mapStateToProps(state) {
     return state;
 }
-export default connect(mapStateToProps, { getTasks, postTask, patchTask, deletTask, putTask, getSingleTask })(EditView);
+export default connect(mapStateToProps, { getTasks, patchTaskTitle, postTask, patchTask, deletTask, putTask, getSingleTask })(EditView);
