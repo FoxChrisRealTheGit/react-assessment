@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { getSingleTask, getTasks, postTask, patchTask, deleteTask, putTask, getState } from '../ducks/reducer';
+import { getSingleTask, getTasks, postTask, patchTask, deletTask, putTask, getState } from '../ducks/reducer';
 
 
 class EditView extends Component {
@@ -9,13 +9,62 @@ class EditView extends Component {
         this.state = {
             title: '',
             description: '',
+            tasks: ''
 
         }
     }
     componentDidMount() {
+        const taskStyle = {
+            display: 'flex',
+        }
+        var mappedtasks;
         var id = this.props.match.params.id
-        this.props.getSingleTask(id)
+        let prom = this.props.getSingleTask(id)
         console.log(id);
+        var tasks = new Promise(function (resolve, reject) {
+            setTimeout(resolve, 100, prom)
+        }).then(res => {
+            mappedtasks = res.value.map((x, i, arr) => {
+                if (x.id == id) {
+                    return (
+                        <div key={i} style={taskStyle}>
+                            <h3>{x.title}</h3>
+                            <button onClick={() => this.completeTask(x.id)}>complete</button>
+                            <h4>{x.description}</h4><button onClick={() => this.handleDescriptionChange}>changeDescription</button>
+                            <button onClick={() => this.removeTask(x.id)}>X</button>
+                        </div>
+                    )
+                }
+            })
+            return this.setState({ tasks: mappedtasks })
+        })
+
+    }
+    componentWillReceiveProps() {
+        const taskStyle = {
+            display: 'flex',
+        }
+        var mappedtasks;
+        var id = this.props.match.params.id
+        let prom = this.props.getSingleTask(id)
+        console.log(id);
+        var tasks = new Promise(function (resolve, reject) {
+            setTimeout(resolve, 100, prom)
+        }).then(res => {
+            mappedtasks = res.value.map((x, i, arr) => {
+                if (x.id == id) {
+                    return (
+                        <div key={i} style={taskStyle}>
+                            <h3>{x.title}</h3>
+                            <button onClick={() => this.completeTask(x.id)}>complete</button>
+                            <h4>{x.description}</h4><button onClick={() => this.handleDescriptionChange()}>changeDescription</button>
+                            <button onClick={() => this.removeTask(x.id)}>X</button>
+                        </div>
+                    )
+                }
+            })
+            return this.setState({ tasks: mappedtasks })
+        })
     }
     handleTitleChange(e) {
         this.setState({ title: e })
@@ -26,8 +75,8 @@ class EditView extends Component {
     addTask() {
         this.props.postTask(this.state.input);
     }
-    removeTask() {
-        this.props.deleteTask();
+    removeTask(id) {
+        this.props.deletTask(id);
     }
     completeTask() {
         this.props.putTask();
@@ -38,9 +87,11 @@ class EditView extends Component {
             <div>
                 <a href='/'>Return to tasks</a>
                 <div>
-                    <button>Save</button>
-                    <button>Cancel</button>
-                    <button>Delete</button>
+                    {this.state.tasks}
+                    <input onChange={e => { this.handleDescriptionChange(e.target.value) }}></input>
+                    <a href='/'><button>Save</button></a>
+                    <a href='/'><button>Cancel</button></a>
+                    <button onClick={() => this.removeTask(this.props.match.params.id)}>Delete</button>
                 </div>
             </div>
         )
@@ -49,4 +100,4 @@ class EditView extends Component {
 function mapStateToProps(state) {
     return state;
 }
-export default connect(mapStateToProps, { getTasks, postTask, patchTask, deleteTask, putTask, getSingleTask })(EditView);
+export default connect(mapStateToProps, { getTasks, postTask, patchTask, deletTask, putTask, getSingleTask })(EditView);

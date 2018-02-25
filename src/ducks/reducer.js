@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const initialState = {
-    tasks: []
+    tasks: [],
 }
 
 const TEST = 'TEST';
@@ -30,21 +30,23 @@ export function getTasks() {
     }
 }
 export function getSingleTask(id) {
-    let gettask = axios.get('https://practiceapi.devmountain.com/api/tasks').then(res => {
+    let gettask = axios.get(`https://practiceapi.devmountain.com/api/tasks`).then(res => {
         return res.data
     })
     return {
         type: GETTASK,
-        payload: gettask, id
+        payload: gettask,
+        id: id
     }
 }
 export function postTask(input) {
-    let posttask = axios.post('https://practiceapi.devmountain.com/api/tasks', { title: input }).then(res => {
-        return res.data
+    var data;
+    let posttasks = axios.post('https://practiceapi.devmountain.com/api/tasks', { title: input }).then(res => {
+        return data = res.data
     })
     return {
         type: POSTTASK,
-        payload: posttask
+        payload: data
     }
 }
 export function patchTask() {
@@ -56,13 +58,13 @@ export function patchTask() {
         payload: patchtask
     }
 }
-export function deleteTask(id) {
-    let deletetask = axios.delete(`https://practiceapi.devmountain.com/api/tasks/${id}`).then(res => {
+export function deletTask(id) {
+    let data = axios.delete(`https://practiceapi.devmountain.com/api/tasks/${id}`).then(res => {
         return res.data
     })
     return {
         type: DELETETASK,
-        payload: deletetask
+        payload: data
     }
 }
 export function putTask(id) {
@@ -74,6 +76,7 @@ export function putTask(id) {
         payload: puttask
     }
 }
+
 export function getState() {
     return {
         type: 'HI'
@@ -83,16 +86,32 @@ export function getState() {
 export default function reducer(state = initialState, action) {
     switch (action.type) {
         case GETTASKS + '_FULFILLED':
-            let tasks = state.tasks.slice();
-            tasks.push(action.payload)
-            return action.payload;
+            var task = action.payload
+            return Object.assign({}, state, { tasks: task });
+        case GETTASK + '_FULFILLED':
+            let data;
+            let task = action.payload
+            for (var x = 0; x < task.length; x += 1) {
+                if (task[x].id === action.id) {
+                    data = task[x]
+                }
+            }
+            console.log(task)
+            return data
         case DELETETASK + '_FULFILLED':
-            return state;
+            console.log(action.payload)
+            return Object.assign({}, state, { tasks: action.payload });
         case POSTTASK + '_FULFILLED':
-            console.log(state.tasks)
-            let tasksss = state.slice();
-            let newTask = tasksss.push(action.payload);
-            return { tasks: newTask }
+            let tasksss;
+            if (state.tasks) {
+                tasksss = state.tasks.slice();
+            } else {
+                tasksss = state.slice();
+            }
+            let newTask = state.tasks.push(action.payload);
+            return Object.assign({}, state, { tasks: newTask });
+        case PUTTASK + '_FULFILLED':
+            return Object.assign({}, state, { tasks: action.payload });
         default:
             return state;
     }
